@@ -30,11 +30,11 @@ After compiling the code, you can run the binary, or use the docker image `make 
 You could pull the image `make pull` or build it locally.
 
 With Curl : 
-`curl http://localhost:8080/eth/lastblock`
+`curl http://localhost:9090/eth/lastblock`
 
-The metrics are avaible at this url : `http://localhost:8080/metrics`
+The metrics are avaible at this url : `http://localhost:9090/metrics`
 
-The liveness, and readyness are availble at this url : `http://localhost:8080/healthz`
+The liveness, and readyness are availble at this url : `http://localhost:9090/healthz`
 
 
 # To do :

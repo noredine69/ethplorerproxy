@@ -7,11 +7,11 @@ images:
   services:
     - name: "main"
       affinity: true
-      servicePort: 8080
+      servicePort: 9090
     - name: "admin"
       monitor: true
       metricsPath: "/metrics"
-      servicePort: 8080
+      servicePort: 9090
       liveness:
           path: "/healthz"
           periodSeconds: 10
