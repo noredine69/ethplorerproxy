@@ -42,9 +42,12 @@ func readConfiguration(configFilePath string) config.Config {
 	var config config.Config
 
 	viper.SetConfigFile(configFilePath)
-	viper.ReadInConfig()
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Sprintf("unable to read config file, %v", err))
+	}
 
-	err := viper.Unmarshal(&config)
+	err = viper.Unmarshal(&config)
 	if err != nil {
 		panic(fmt.Sprintf("unable to decode into struct, %v", err))
 	}

@@ -1,11 +1,11 @@
 {
-    "api":
+    "eth":
     {
         "url":          "https://api.ethplorer.io/",
         "apiKey":       "XXXX",
         "function":     "getLastBlock"
     },
-    "server":
+    "api":
     {
         "port":         8080,
         "secretKey":    "XXXX"

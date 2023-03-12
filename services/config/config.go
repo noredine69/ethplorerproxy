@@ -7,9 +7,9 @@ type Config struct {
 }
 
 type EthConfig struct {
-	Url                  string `json:"url"`
-	ApiKey               string `json:"apiKey"`
-	GetLastBlockFunction string `json:"function"`
+	Url      string `json:"url"`
+	ApiKey   string `json:"apiKey"`
+	Function string `json:"function"`
 }
 
 type ApiConfig struct {

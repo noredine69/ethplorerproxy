@@ -54,9 +54,9 @@ func TestEthApi(t *testing.T) {
 func initConfigHelper(cloudServiceAddress string) config.Config {
 	return config.Config{
 		Eth: config.EthConfig{
-			Url:                  cloudServiceAddress,
-			ApiKey:               ETH_PLORER_API_KEY,
-			GetLastBlockFunction: ETH_GET_LAST_BLOCK_FCT,
+			Url:      cloudServiceAddress,
+			ApiKey:   ETH_PLORER_API_KEY,
+			Function: ETH_GET_LAST_BLOCK_FCT,
 		},
 	}
 }

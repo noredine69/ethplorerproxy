@@ -42,8 +42,7 @@ func New(config config.EthConfig) *EthAPI {
 }
 
 func (eth *EthAPI) Request(ctx context.Context, methodName string, params []string, response interface{}) error {
-	requestUrl := fmt.Sprintf("%s%s?apiKey=%s", eth.config.Url, eth.config.GetLastBlockFunction, eth.config.ApiKey)
-
+	requestUrl := fmt.Sprintf("%s%s?apiKey=%s", eth.config.Url, eth.config.Function, eth.config.ApiKey)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestUrl, nil)
 	if err != nil {
 		return err
