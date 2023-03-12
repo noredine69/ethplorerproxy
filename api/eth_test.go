@@ -51,19 +51,14 @@ func TestEthApi(t *testing.T) {
 	assert.Equal(t, expectedLastBlockId, result.LastBlockId)
 }
 
-func initConfigHelper(cloudServiceAddress string) config.ConfigServiceInterface {
-	conf := config.NewMock()
-	conf.GetConfigFunc = func() config.Config {
-		return config.Config{
-			Api: config.ApiConfig{
-				Url:                  cloudServiceAddress,
-				ApiKey:               ETH_PLORER_API_KEY,
-				GetLastBlockFunction: ETH_GET_LAST_BLOCK_FCT,
-			},
-		}
+func initConfigHelper(cloudServiceAddress string) config.Config {
+	return config.Config{
+		Eth: config.EthConfig{
+			Url:                  cloudServiceAddress,
+			ApiKey:               ETH_PLORER_API_KEY,
+			GetLastBlockFunction: ETH_GET_LAST_BLOCK_FCT,
+		},
 	}
-
-	return conf
 }
 
 func checkLogsRouteCallStatusError(t *testing.T, url string, verb string) string {

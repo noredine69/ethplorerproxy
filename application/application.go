@@ -4,9 +4,11 @@ import (
 	"errors"
 	"ethproxy/api"
 	"ethproxy/services/config"
+	"fmt"
 	"os"
 
 	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -19,27 +21,34 @@ type ApplicationInterface interface {
 }
 
 type Application struct {
-	configuration config.ConfigServiceInterface
+	configuration config.Config
 	api           *api.Api
 	sigs          chan os.Signal
 }
 
 func New(configFilePath string, debugMode bool) (*Application, error) {
-	configuration, err := config.New(configFilePath, debugMode)
-	if err != nil {
-		log.Error().Msgf("Error loading configuration: %v", err)
-		return nil, ErrCannotStartApp
-	}
-
 	app := &Application{
-		configuration: configuration,
+		configuration: readConfiguration(configFilePath),
 	}
 
-	if err = app.initServiceLayer(); err != nil {
+	if err := app.initServiceLayer(); err != nil {
 		log.Error().Msgf("Error intializing service layers: %v", err)
 		return nil, ErrCannotStartApp
 	}
 	return app, nil
+}
+
+func readConfiguration(configFilePath string) config.Config {
+	var config config.Config
+
+	viper.SetConfigFile(configFilePath)
+	viper.ReadInConfig()
+
+	err := viper.Unmarshal(&config)
+	if err != nil {
+		panic(fmt.Sprintf("unable to decode into struct, %v", err))
+	}
+	return config
 }
 
 func (app *Application) Run() {

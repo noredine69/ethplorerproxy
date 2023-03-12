@@ -24,7 +24,7 @@ func (api *Api) declareEthRoutes() {
 func (api *Api) lastBlock(ginContext *gin.Context) {
 	api.incGaugeMetricForEndpoint(METRICS_GET_LAST_BLOCK_END_POINT, METRICS_GET_LAST_BLOCK_NB_CALL)
 	getLastBlockResponse := eth.LastBlock{}
-	err := api.ethApi.Request(ginContext, api.ConfigService.GetConfig().Api.GetLastBlockFunction, []string{}, &getLastBlockResponse)
+	err := api.ethApi.Request(ginContext, api.config.Eth.GetLastBlockFunction, []string{}, &getLastBlockResponse)
 	if err != nil {
 		ginContext.JSON(http.StatusInternalServerError, gin.H{
 			"message": "The request has failed",

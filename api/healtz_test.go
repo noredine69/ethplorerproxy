@@ -18,11 +18,6 @@ func TestHealth(t *testing.T) {
 	assert.Equal(t, "", body)
 }
 
-func initConfigHelperForHealth() config.ConfigServiceInterface {
-	conf := config.NewMock()
-	conf.GetConfigFunc = func() config.Config {
-		return config.Config{}
-	}
-
-	return conf
+func initConfigHelperForHealth() config.Config {
+	return config.Config{}
 }

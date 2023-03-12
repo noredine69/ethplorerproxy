@@ -32,17 +32,17 @@ type EthAPIInterface interface {
 }
 
 type EthAPI struct {
-	Config config.ConfigServiceInterface
+	config config.EthConfig
 }
 
-func New(configService config.ConfigServiceInterface) *EthAPI {
+func New(config config.EthConfig) *EthAPI {
 	return &EthAPI{
-		Config: configService,
+		config: config,
 	}
 }
 
 func (eth *EthAPI) Request(ctx context.Context, methodName string, params []string, response interface{}) error {
-	requestUrl := fmt.Sprintf("%s%s?apiKey=%s", eth.Config.GetConfig().Api.Url, eth.Config.GetConfig().Api.GetLastBlockFunction, eth.Config.GetConfig().Api.ApiKey)
+	requestUrl := fmt.Sprintf("%s%s?apiKey=%s", eth.config.Url, eth.config.GetLastBlockFunction, eth.config.ApiKey)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestUrl, nil)
 	if err != nil {

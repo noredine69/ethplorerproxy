@@ -16,15 +16,15 @@ import (
 )
 
 type Api struct {
-	ConfigService  config.ConfigServiceInterface
+	config         config.Config
 	router         *gin.Engine
 	ethApi         eth.EthAPIInterface
 	metricsMonitor *ginmetrics.Monitor
 }
 
-func New(config config.ConfigServiceInterface) *Api {
-	api := Api{ConfigService: config}
-	api.ethApi = eth.New(config)
+func New(config config.Config) *Api {
+	api := Api{config: config}
+	api.ethApi = eth.New(config.Eth)
 	api.DeclareRoutes()
 	return &api
 }
@@ -46,7 +46,7 @@ func (api *Api) declareBackEndRoutes() {
 }
 
 func (api *Api) initGinEngine() {
-	if !api.ConfigService.DebugMode() {
+	if !api.config.DebugMode {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -55,16 +55,16 @@ func (api *Api) initGinEngine() {
 	api.router.Use(gin.LoggerWithFormatter(logWithZeroLog))
 
 	// For profiling
-	if api.ConfigService.DebugMode() {
+	if api.config.DebugMode {
 		pprof.Register(api.router)
 	}
 }
 
 func (api *Api) Run() {
-	port := strconv.FormatUint(uint64(api.ConfigService.GetConfig().Server.Port), formatUintBase)
+	port := strconv.FormatUint(uint64(api.config.Api.Port), formatUintBase)
 	log.Info().Msg("Server Started on Port " + port)
 	err := endless.ListenAndServe(":"+port,
-		csrf.Protect([]byte(api.ConfigService.GetConfig().Server.SecretKey),
+		csrf.Protect([]byte(api.config.Api.SecretKey),
 			csrf.Secure(false),
 			csrf.SameSite(csrf.SameSiteStrictMode),
 			csrf.Path("/"),
