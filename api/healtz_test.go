@@ -1,4 +1,4 @@
-package controllers
+package api
 
 import (
 	"ethproxy/models"
@@ -12,8 +12,8 @@ import (
 
 func TestHealth(t *testing.T) {
 	conf := initConfigHelperForHealth()
-	controller := New(conf)
-	ts := httptest.NewServer(controller.router)
+	api := New(conf)
+	ts := httptest.NewServer(api.router)
 	defer ts.Close()
 	body := checkLogsRouteCallStatusOk(t, fmt.Sprintf("%s/healthz", ts.URL), "GET")
 	assert.Equal(t, "", body)

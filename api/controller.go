@@ -1,4 +1,4 @@
-package controllers
+package api
 
 import (
 	"encoding/json"
@@ -15,60 +15,60 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type Controller struct {
+type Api struct {
 	ConfigService  config.ConfigServiceInterface
 	router         *gin.Engine
 	ethApi         eth.EthAPIInterface
 	metricsMonitor *ginmetrics.Monitor
 }
 
-func New(config config.ConfigServiceInterface) *Controller {
-	ctrl := Controller{ConfigService: config}
-	ctrl.ethApi = eth.New(config)
-	ctrl.DeclareRoutes()
-	return &ctrl
+func New(config config.ConfigServiceInterface) *Api {
+	api := Api{ConfigService: config}
+	api.ethApi = eth.New(config)
+	api.DeclareRoutes()
+	return &api
 }
 
 const (
 	formatUintBase = 10
 )
 
-func (ctrl *Controller) DeclareRoutes() {
-	ctrl.initGinEngine()
-	ctrl.declareBackEndRoutes()
+func (api *Api) DeclareRoutes() {
+	api.initGinEngine()
+	api.declareBackEndRoutes()
 }
 
-func (ctrl *Controller) declareBackEndRoutes() {
+func (api *Api) declareBackEndRoutes() {
 	// Don't change the order, metrics routes must be declare first in order to be called by other endpoints
-	ctrl.declareMetricsRoutes()
-	ctrl.declareEthRoutes()
-	ctrl.declareHealthRoutes()
+	api.declareMetricsRoutes()
+	api.declareEthRoutes()
+	api.declareHealthRoutes()
 }
 
-func (ctrl *Controller) initGinEngine() {
-	if !ctrl.ConfigService.DebugMode() {
+func (api *Api) initGinEngine() {
+	if !api.ConfigService.DebugMode() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	ctrl.router = gin.New()
-	ctrl.router.Use(gin.Recovery())
-	ctrl.router.Use(gin.LoggerWithFormatter(logWithZeroLog))
+	api.router = gin.New()
+	api.router.Use(gin.Recovery())
+	api.router.Use(gin.LoggerWithFormatter(logWithZeroLog))
 
 	// For profiling
-	if ctrl.ConfigService.DebugMode() {
-		pprof.Register(ctrl.router)
+	if api.ConfigService.DebugMode() {
+		pprof.Register(api.router)
 	}
 }
 
-func (ctrl *Controller) Run() {
-	port := strconv.FormatUint(uint64(ctrl.ConfigService.GetConfig().Server.Port), formatUintBase)
+func (api *Api) Run() {
+	port := strconv.FormatUint(uint64(api.ConfigService.GetConfig().Server.Port), formatUintBase)
 	log.Info().Msg("Server Started on Port " + port)
 	err := endless.ListenAndServe(":"+port,
-		csrf.Protect([]byte(ctrl.ConfigService.GetConfig().Server.SecretKey),
+		csrf.Protect([]byte(api.ConfigService.GetConfig().Server.SecretKey),
 			csrf.Secure(false),
 			csrf.SameSite(csrf.SameSiteStrictMode),
 			csrf.Path("/"),
-			csrf.ErrorHandler(http.HandlerFunc(csrfErrorHandlerFunc)))(ctrl.router))
+			csrf.ErrorHandler(http.HandlerFunc(csrfErrorHandlerFunc)))(api.router))
 
 	if err != nil {
 		log.Error().Err(err).Msgf("Error while starting the web server")

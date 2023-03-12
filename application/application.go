@@ -2,7 +2,7 @@ package application
 
 import (
 	"errors"
-	"ethproxy/controllers"
+	"ethproxy/api"
 	"ethproxy/services/config"
 	"os"
 
@@ -20,7 +20,7 @@ type ApplicationInterface interface {
 
 type Application struct {
 	configuration config.ConfigServiceInterface
-	controller    *controllers.Controller
+	api           *api.Api
 	sigs          chan os.Signal
 }
 
@@ -48,7 +48,7 @@ func (app *Application) Run() {
 func (app *Application) Stop() {
 }
 func (app *Application) initServiceLayer() error {
-	app.controller = controllers.New(app.configuration)
-	app.controller.Run()
+	app.api = api.New(app.configuration)
+	app.api.Run()
 	return nil
 }
