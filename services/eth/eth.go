@@ -1,10 +1,11 @@
 package eth
 
 import (
+	"context"
 	"encoding/json"
-	"ethproxy/services/backendapi"
 	"ethproxy/services/config"
 	"fmt"
+	"net/http"
 
 	"github.com/rs/zerolog/log"
 )
@@ -27,36 +28,42 @@ type ProxyEthResponse struct {
 }
 
 type EthAPIInterface interface {
-	SendEthRequest(methodName string, params []string, response interface{}) error
+	Request(ctx context.Context, methodName string, params []string, response interface{}) error
 }
 
 type EthAPI struct {
-	Config     config.ConfigServiceInterface
-	backendapi backendapi.BackEndAPIInterface
+	Config config.ConfigServiceInterface
 }
 
 func New(configService config.ConfigServiceInterface) *EthAPI {
 	return &EthAPI{
-		Config:     configService,
-		backendapi: backendapi.New(configService),
+		Config: configService,
 	}
 }
 
-func (eth *EthAPI) SendEthRequest(methodName string, params []string, response interface{}) error {
+func (eth *EthAPI) Request(ctx context.Context, methodName string, params []string, response interface{}) error {
 	requestUrl := fmt.Sprintf("%s%s?apiKey=%s", eth.Config.GetConfig().Api.Url, eth.Config.GetConfig().Api.GetLastBlockFunction, eth.Config.GetConfig().Api.ApiKey)
-	resp, err := eth.backendapi.BuildAndSendGetRequest(requestUrl)
-	defer eth.backendapi.CloseRespBody(requestUrl, resp)
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, requestUrl, nil)
 	if err != nil {
-		log.Error().Err(err).Msgf("Error from buildAndSendRequest")
 		return err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return fmt.Errorf("received bad http status for %s, %d", requestUrl, resp.StatusCode)
 	}
 
 	err = json.NewDecoder(resp.Body).Decode(&response)
 	if err != nil {
-		log.Error().Err(err).Msg("Error while decoding eth response json string")
-		return err
+		return fmt.Errorf("error while decoding eth response, %w", err)
 	}
-	log.Info().Msgf("Received Eth response : %v", response)
-
+	log.Info().Msgf("received eth response : %+v", response)
 	return nil
 }

@@ -21,15 +21,15 @@ func (api *Api) declareEthRoutes() {
 	api.addGaugeMetricForEndpoint(METRICS_GET_LAST_BLOCK_END_POINT, METRICS_GET_LAST_BLOCK_NB_CALL, METRICS_GET_LAST_BLOCK_DESC)
 }
 
-func (api *Api) lastBlock(c *gin.Context) {
+func (api *Api) lastBlock(ginContext *gin.Context) {
 	api.incGaugeMetricForEndpoint(METRICS_GET_LAST_BLOCK_END_POINT, METRICS_GET_LAST_BLOCK_NB_CALL)
 	getLastBlockResponse := eth.LastBlock{}
-	err := api.ethApi.SendEthRequest(api.ConfigService.GetConfig().Api.GetLastBlockFunction, []string{}, &getLastBlockResponse)
+	err := api.ethApi.Request(ginContext, api.ConfigService.GetConfig().Api.GetLastBlockFunction, []string{}, &getLastBlockResponse)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		ginContext.JSON(http.StatusInternalServerError, gin.H{
 			"message": "The request has failed",
 		})
 	} else {
-		c.JSON(http.StatusOK, getLastBlockResponse)
+		ginContext.JSON(http.StatusOK, getLastBlockResponse)
 	}
 }
