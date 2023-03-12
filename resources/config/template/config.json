@@ -1,0 +1,13 @@
+{
+    "eth":
+    {
+        "url":          "https://api.ethplorer.io/",
+        "apiKey":       "XXXX",
+        "function":     "getLastBlock"
+    },
+    "api":
+    {
+        "port":         9090,
+        "secretKey":    "XXXX"
+    }
+ }

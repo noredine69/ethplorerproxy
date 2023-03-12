@@ -1,0 +1,116 @@
+stages:
+  - compile
+  - test
+  - code-quality
+  - stage-sonar
+  - create-package
+
+.main_conditions:
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "${MAIN_BRANCHE_NAME}" || $CI_COMMIT_REF_NAME == "develop" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_COMMIT_REF_NAME =~ /^release/ || $CI_COMMIT_TAG '
+      when: always
+    - when: never
+
+.manual_conditions:
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "${MAIN_BRANCHE_NAME}" || $CI_COMMIT_REF_NAME == "develop" || $CI_COMMIT_REF_NAME =~ /^release/ || $CI_COMMIT_TAG '
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+    - when: never
+
+compile:
+  before_script:
+    - *git_credentials
+    - *export_variables
+  image: golang:1.17.5-buster
+  stage: compile
+  tags:
+    - ops-engineering
+  script:
+    - ${CI_PROJECT_DIR}/.scripts/build.sh ${CI_PROJECT_DIR} ${APP_NAME}
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - ${CI_PROJECT_DIR}/build/*
+  extends:
+    - .main_conditions
+
+test:
+  image: golang:1.17.5-buster
+  stage: test
+  allow_failure: true
+  script:
+    - ${CI_PROJECT_DIR}/.scripts/test.sh ${CI_PROJECT_DIR}
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - coverage.out
+    reports:
+      junit: report.xml
+  extends:
+    - .main_conditions
+
+code-quality:
+  image: golang:1.17.5-buster
+  stage: code-quality
+  allow_failure: true
+  script:
+    - ${CI_PROJECT_DIR}/.scripts/lint.sh ${CI_PROJECT_DIR}
+  artifacts:
+    expire_in: 2 days
+    reports:
+      codequality: gl-code-quality-report.json
+    paths:
+      - gl-code-quality-report.json
+      - sonarqube_report.xml
+  extends:
+    - .main_conditions
+
+stage-sonar:
+  stage: stage-sonar
+  tags:
+    - ops-engineering
+  allow_failure: true
+  image:
+    name: "sonarsource/sonar-scanner-cli"
+    entrypoint: [""]
+  script:
+    - echo "Not yet implemented, because I have to install a sonarqube instance on my personnal Nas"
+  extends:
+    - .main_conditions
+
+create-package:
+  before_script:
+    - *git_credentials
+    - *back_version
+    - *export_variables
+  script:
+    - mkdir -p /build${DEB_PKG_BIN_DIR}/${DEB_PKG_STATIC_DIR}
+    - mv ${CI_PROJECT_DIR}/build/${APP_NAME} /build${DEB_PKG_BIN_DIR}
+    - mkdir -p /build${DEB_PKG_LIB_DIR}
+    - mv ${CI_PROJECT_DIR}/build/*.so /build${DEB_PKG_LIB_DIR}
+    - mkdir -p /build${DEB_PKG_DOC}
+    - cp ${CI_PROJECT_DIR}/doc/RELEASE_NOTE* /build${DEB_PKG_DOC}
+    - mkdir -p /build${DEB_PKG_PATCH_7_2_DIR}
+    - cp -R ${CI_PROJECT_DIR}/patch7_2/* /build${DEB_PKG_PATCH_7_2_DIR}
+    - mkdir -p /build${DEB_PKG_CONF_DIR}
+    - mv ${CI_PROJECT_DIR}/${DEB_PKG_STATIC_DIR}/${FRONT_ARCHIVE} /build${DEB_PKG_BIN_DIR}/${DEB_PKG_STATIC_DIR}
+    - cd /build${DEB_PKG_BIN_DIR}/${DEB_PKG_STATIC_DIR}
+    - tar xzvf ${FRONT_ARCHIVE}
+    - rm -f ${FRONT_ARCHIVE}
+    - cd /
+    - mkdir /release
+    - ./entrypoint.sh
+    - mv /release/${FILENAME} ${CI_PROJECT_DIR}/${FILENAME}
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - ${CI_PROJECT_DIR}/${FILENAME}
+  image: ${REGISTRY}/debian-package-builder:latest
+  stage: create-package
+  tags:
+    - ops-engineering
+  extends:
+    - .manual_conditions
+

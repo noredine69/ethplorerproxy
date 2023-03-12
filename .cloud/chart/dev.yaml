@@ -1,0 +1,29 @@
+name: "ethplorer-proxy"
+domain: "noredine69.world.company"
+
+images:
+  repository: "noredine69.public/ethplorer-proxy"
+  pullPolicy: "Always"
+  services:
+    - name: "main"
+      affinity: true
+      servicePort: 9090
+    - name: "admin"
+      monitor: true
+      metricsPath: "/metrics"
+      servicePort: 9090
+      liveness:
+          path: "/healthz"
+          periodSeconds: 10
+          timeoutSeconds: 5
+      readiness:
+          path: "/healthz"
+          periodSeconds: 10
+          timeoutSeconds: 5
+resources:
+  limits:
+    cpu: 300m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 256Mi
