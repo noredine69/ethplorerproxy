@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"ethproxy/models"
 	"ethproxy/services/config"
+	"ethproxy/services/eth"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -22,7 +22,7 @@ var (
 
 func TestEthApi(t *testing.T) {
 	expectedLastBlockId := uint(123456789)
-	ethResponse := models.LastBlock{
+	ethResponse := eth.LastBlock{
 		LastBlockId: expectedLastBlockId,
 	}
 	expectedJsonStream, _ := json.Marshal(ethResponse)
@@ -45,7 +45,7 @@ func TestEthApi(t *testing.T) {
 	assert.Equal(t, ERROR_PAGE_NOT_FOUND, body)
 
 	body = checkLogsRouteCallStatusOk(t, fmt.Sprintf("%s/eth/%s", ts.URL, ETH_GET_LAST_BLOCK_FCT), "GET")
-	var result models.LastBlock
+	var result eth.LastBlock
 	errUnMarshall := json.Unmarshal([]byte(body), &result)
 	assert.Nil(t, errUnMarshall)
 	assert.Equal(t, expectedLastBlockId, result.LastBlockId)
@@ -53,9 +53,9 @@ func TestEthApi(t *testing.T) {
 
 func initConfigHelper(cloudServiceAddress string) config.ConfigServiceInterface {
 	conf := config.NewMock()
-	conf.GetConfigFunc = func() models.Config {
-		return models.Config{
-			Api: models.ApiConfig{
+	conf.GetConfigFunc = func() config.Config {
+		return config.Config{
+			Api: config.ApiConfig{
 				Url:                  cloudServiceAddress,
 				ApiKey:               ETH_PLORER_API_KEY,
 				GetLastBlockFunction: ETH_GET_LAST_BLOCK_FCT,

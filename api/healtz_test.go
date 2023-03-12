@@ -1,7 +1,6 @@
 package api
 
 import (
-	"ethproxy/models"
 	"ethproxy/services/config"
 	"fmt"
 	"net/http/httptest"
@@ -21,8 +20,8 @@ func TestHealth(t *testing.T) {
 
 func initConfigHelperForHealth() config.ConfigServiceInterface {
 	conf := config.NewMock()
-	conf.GetConfigFunc = func() models.Config {
-		return models.Config{}
+	conf.GetConfigFunc = func() config.Config {
+		return config.Config{}
 	}
 
 	return conf

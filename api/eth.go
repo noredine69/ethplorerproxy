@@ -1,7 +1,7 @@
 package api
 
 import (
-	"ethproxy/models"
+	"ethproxy/services/eth"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +23,7 @@ func (api *Api) declareEthRoutes() {
 
 func (api *Api) lastBlock(c *gin.Context) {
 	api.incGaugeMetricForEndpoint(METRICS_GET_LAST_BLOCK_END_POINT, METRICS_GET_LAST_BLOCK_NB_CALL)
-	getLastBlockResponse := models.LastBlock{}
+	getLastBlockResponse := eth.LastBlock{}
 	err := api.ethApi.SendEthRequest(api.ConfigService.GetConfig().Api.GetLastBlockFunction, []string{}, &getLastBlockResponse)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

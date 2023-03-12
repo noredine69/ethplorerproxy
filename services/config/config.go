@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"ethproxy/models"
 	"os"
 
 	"github.com/rs/zerolog"
@@ -10,15 +9,32 @@ import (
 )
 
 type ConfigServiceInterface interface {
-	GetConfig() models.Config
+	GetConfig() Config
 	DebugMode() bool
 }
 
 type ConfigService struct {
 	logger     zerolog.Logger
-	config     models.Config
+	config     Config
 	configFile string
 	debugMode  bool
+}
+
+type Config struct {
+	Api       ApiConfig
+	Server    HttServerConfig
+	DebugMode bool
+}
+
+type ApiConfig struct {
+	Url                  string `json:"url"`
+	ApiKey               string `json:"apiKey"`
+	GetLastBlockFunction string `json:"function"`
+}
+
+type HttServerConfig struct {
+	Port      int    `json:"port"`
+	SecretKey string `json:"secretKey"`
 }
 
 func New(configFile string, debugMode bool) (*ConfigService, error) {
@@ -26,7 +42,6 @@ func New(configFile string, debugMode bool) (*ConfigService, error) {
 		configFile: configFile,
 		debugMode:  debugMode,
 	}
-	service.logger = log.With().Str(models.LoggerService, string(service.GetType())).Logger()
 
 	config, err := service.loadConfiguration()
 	if err != nil {
@@ -36,11 +51,7 @@ func New(configFile string, debugMode bool) (*ConfigService, error) {
 	return &service, nil
 }
 
-func (service *ConfigService) GetType() models.ServiceType {
-	return models.ConfigService
-}
-
-func (service *ConfigService) GetConfig() models.Config {
+func (service *ConfigService) GetConfig() Config {
 	return service.config
 }
 
@@ -49,10 +60,10 @@ func (service *ConfigService) DebugMode() bool {
 }
 
 // nolint: gosec
-func (service *ConfigService) loadConfiguration() (ethConfig *models.Config, err error) {
+func (service *ConfigService) loadConfiguration() (ethConfig *Config, err error) {
 	file, err := os.Open(service.configFile)
 	if err != nil {
-		service.logger.Error().Err(err).Msgf("Error opening %s", service.configFile)
+		log.Error().Err(err).Msgf("Error opening %s", service.configFile)
 		return
 	}
 	defer func() {
@@ -64,7 +75,7 @@ func (service *ConfigService) loadConfiguration() (ethConfig *models.Config, err
 	jsonParser := json.NewDecoder(file)
 	err = jsonParser.Decode(&ethConfig)
 	if err != nil {
-		service.logger.Error().Err(err).Msgf("Error decoding content of config file")
+		log.Error().Err(err).Msgf("Error decoding content of config file")
 	}
 	return
 }

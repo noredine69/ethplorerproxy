@@ -1,15 +1,13 @@
 package config
 
 import (
-	"ethproxy/models"
-
 	"github.com/rs/zerolog/log"
 )
 
 const NoMockError = "No mocked function provided %s"
 
 type ConfigServiceMock struct {
-	GetConfigFunc func() models.Config
+	GetConfigFunc func() Config
 	DebugModeFunc func() bool
 }
 
@@ -17,12 +15,12 @@ func NewMock() *ConfigServiceMock {
 	return &ConfigServiceMock{}
 }
 
-func (mock *ConfigServiceMock) GetConfig() models.Config {
+func (mock *ConfigServiceMock) GetConfig() Config {
 	if mock.GetConfigFunc != nil {
 		return mock.GetConfigFunc()
 	}
 	log.Warn().Msgf(NoMockError, "GetConfig")
-	return models.Config{}
+	return Config{}
 }
 func (mock *ConfigServiceMock) DebugMode() bool {
 	if mock.DebugModeFunc != nil {

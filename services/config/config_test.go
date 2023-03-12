@@ -1,7 +1,6 @@
 package config
 
 import (
-	"ethproxy/models"
 	"reflect"
 	"testing"
 )
@@ -13,19 +12,19 @@ func TestLoadConfig(t *testing.T) {
 	tests := []struct {
 		name       string
 		args       args
-		wantConfig *models.Config
+		wantConfig *Config
 		wantErr    bool
 	}{
 		{
 			name: "Nominal use case",
 			args: args{configFile: "../../testdata/golden/config/config_nominal.golden"},
-			wantConfig: &models.Config{
-				Api: models.ApiConfig{
+			wantConfig: &Config{
+				Api: ApiConfig{
 					Url:                  "https://api.ethplorer.io/",
 					ApiKey:               "XXXX",
 					GetLastBlockFunction: "getLastBlock",
 				},
-				Server: models.HttServerConfig{
+				Server: HttServerConfig{
 					Port:      8080,
 					SecretKey: "R0hklKt1OKiOwCqL3llE",
 				},

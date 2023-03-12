@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"ethproxy/models"
 	"ethproxy/services/config"
 	"fmt"
 	"io"
@@ -44,10 +43,6 @@ func New(configService config.ConfigServiceInterface) *BackEndAPI {
 		Config:     configService,
 		HTTPClient: http.Client{},
 	}
-}
-
-func (backEndAPI BackEndAPI) GetType() models.ServiceType {
-	return models.BackEndAPI
 }
 
 func (back *BackEndAPI) BuildAndSendGetRequest(urlRequest string) (resp *http.Response, err error) {

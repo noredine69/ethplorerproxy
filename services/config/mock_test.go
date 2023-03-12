@@ -1,7 +1,6 @@
 package config
 
 import (
-	"ethproxy/models"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,9 +16,9 @@ func TestMock(t *testing.T) {
 	// Classic mock
 	var called bool
 
-	mock.GetConfigFunc = func() models.Config {
+	mock.GetConfigFunc = func() Config {
 		called = true
-		return models.Config{}
+		return Config{}
 	}
 	mock.DebugModeFunc = func() bool {
 		called = true
